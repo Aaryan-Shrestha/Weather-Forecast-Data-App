@@ -13,26 +13,31 @@ options = st.selectbox(label="Select data to view:",
                        options=('Temperature', 'Sky'))
 st.subheader(f"{options} for the next {forecast_days} {"day" if forecast_days == 1 else "days"} in {place}: ")
 
+
 if place:
-    # Backend i.e. (Get the temperature/sky data)
-    filtered_data = get_data(place, forecast_days)
+    try:
+        # Backend i.e. (Get the temperature/sky data)
+        filtered_data = get_data(place, forecast_days)
 
-    if options == "Temperature":
-        kelvin_temperatures = [key["main"]["temp"] for key in filtered_data]
-        kelvin_to_celsius = [(temp - 273.15) for temp in kelvin_temperatures]
-        dates = [date["dt_txt"] for date in filtered_data]
+        if options == "Temperature":
+            kelvin_temperatures = [key["main"]["temp"] for key in filtered_data]
+            kelvin_to_celsius = [(temp - 273.15) for temp in kelvin_temperatures]
+            dates = [date["dt_txt"] for date in filtered_data]
 
-        # Create a temperature plot
-        figure = px.line(x=dates,
-                         y=kelvin_to_celsius,
-                         labels={"x": "Date", "y": "Temperatures (°C)"})
-        st.plotly_chart(figure)
+            # Create a temperature plot
+            figure = px.line(x=dates,
+                             y=kelvin_to_celsius,
+                             labels={"x": "Date", "y": "Temperatures (°C)"})
+            st.plotly_chart(figure)
 
 
-    if options == "Sky":
-        images = {"Clear": "images/clear.png", "Clouds": "images/cloud.png", "Rain": "images/rain.png", "Snow": "images/snow.png"}
-        sky_condition = [key["weather"][0]['main'] for key in filtered_data]
-        times = [time["dt_txt"] for time in filtered_data]
-        images_paths = [images[condition] for condition in sky_condition]
-        # Create a Sky figure
-        st.image(images_paths, width=150, caption=times)
+        if options == "Sky":
+            images = {"Clear": "images/clear.png", "Clouds": "images/cloud.png", "Rain": "images/rain.png", "Snow": "images/snow.png"}
+            sky_condition = [key["weather"][0]['main'] for key in filtered_data]
+            times = [time["dt_txt"] for time in filtered_data]
+            images_paths = [images[condition] for condition in sky_condition]
+            # Create a Sky figure
+            st.image(images_paths, width=150, caption=times)
+
+    except KeyError:
+        st.info(f"{place} doesn't exist. Please try again!")
